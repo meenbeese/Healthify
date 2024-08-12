@@ -5,7 +5,6 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.room.Room
-import com.auth0.android.Auth0
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -34,9 +33,6 @@ import javax.inject.Singleton
 object Module {
 
     private val Context.dataStore by preferencesDataStore(DATASTORE)
-
-    @Provides
-    fun providesAuth0(): Auth0 = Auth0(CLIENT_ID, DOMAIN_NAME)
 
     @Provides
     fun providesFireStore(): FirebaseFirestore = Firebase.firestore

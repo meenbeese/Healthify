@@ -8,10 +8,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import com.auth0.android.Auth0
-import com.auth0.android.authentication.AuthenticationException
-import com.auth0.android.callback.Callback
-import com.auth0.android.provider.WebAuthProvider
 import com.vaibhav.healthify.R
 import com.vaibhav.healthify.databinding.FragmentProfileBinding
 import com.vaibhav.healthify.ui.auth.AuthActivity
@@ -21,16 +17,12 @@ import com.vaibhav.healthify.ui.dialogs.noInternetDialog.NoInternetDialogFragmen
 import com.vaibhav.healthify.util.*
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
     private val binding by viewBinding(FragmentProfileBinding::bind)
     private val viewModel by viewModels<ProfileViewModel>()
-
-    @Inject
-    lateinit var auth0: Auth0
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -78,7 +70,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
     private fun collectUiState() = viewLifecycleOwner.lifecycleScope.launchWhenStarted {
         viewModel.events.collect {
             when (it) {
-                ProfileScreenEvents.Logout -> logout()
+                ProfileScreenEvents.Logout -> viewModel.onLogoutConfirmed()
                 ProfileScreenEvents.NavigateToAboutScreen -> navigateToAboutScreen()
                 ProfileScreenEvents.NavigateToAuthScreen -> navigateToAuthScreen()
                 is ProfileScreenEvents.ShowLogoutDialog -> showLogoutDialog(
@@ -98,25 +90,6 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                 ProfileScreenEvents.ShowNoInternetDialog -> openNoInternetDialog()
             }
         }
-    }
-
-    private fun logout() {
-        viewModel.disableLogoutButton()
-        WebAuthProvider
-            .logout(auth0)
-            .withScheme(getString(R.string.scheme))
-            .start(
-                requireContext(),
-                object : Callback<Void?, AuthenticationException> {
-                    override fun onFailure(error: AuthenticationException) {
-                        viewModel.onLogoutFailed(error)
-                    }
-
-                    override fun onSuccess(result: Void?) {
-                        viewModel.onLogoutSuccess()
-                    }
-                }
-            )
     }
 
     private fun showLogoutDialog(title: String, message: String) {

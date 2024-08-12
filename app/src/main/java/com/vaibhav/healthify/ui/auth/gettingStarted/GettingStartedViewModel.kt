@@ -2,9 +2,7 @@ package com.vaibhav.healthify.ui.auth.gettingStarted
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.auth0.android.result.UserProfile
 import com.vaibhav.healthify.data.repo.AuthRepo
-import com.vaibhav.healthify.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,17 +31,11 @@ class GettingStartedViewModel @Inject constructor(private val authRepo: AuthRepo
         private const val LOGIN_SUCCESS = "User logged in successfully"
     }
 
-    private val user = MutableStateFlow<UserProfile?>(null)
-
     private val _uiState = MutableStateFlow(GettingStartedScreenState())
     val uiState: StateFlow<GettingStartedScreenState> = _uiState
 
     private val _events = MutableSharedFlow<GettingStartedScreenEvents>()
     val events: SharedFlow<GettingStartedScreenEvents> = _events
-
-    fun saveUser(userProfile: UserProfile) = viewModelScope.launch {
-        user.emit(userProfile)
-    }
 
     fun startLoading() = viewModelScope.launch {
         _uiState.emit(_uiState.value.copy(isLoading = true, isButtonEnabled = false))
@@ -56,30 +48,6 @@ class GettingStartedViewModel @Inject constructor(private val authRepo: AuthRepo
     fun sendError(message: String) = viewModelScope.launch {
         stopLoading()
         _events.emit(GettingStartedScreenEvents.ShowToast(message))
-    }
-
-    fun loginComplete() = viewModelScope.launch {
-        user.value?.let {
-            val isUserAlreadyRegistered = authRepo.isUserRegistered(it)
-            if (isUserAlreadyRegistered is Resource.Error) {
-                sendError(isUserAlreadyRegistered.message)
-                _events.emit(GettingStartedScreenEvents.Logout)
-                return@launch
-            }
-            val resource = authRepo.continueAfterLogin(it)
-            stopLoading()
-            if (resource is Resource.Success) {
-                _events.emit(GettingStartedScreenEvents.ShowToast(LOGIN_SUCCESS))
-                if (isUserAlreadyRegistered.data!!) {
-                    authRepo.saveUserDataEntryCompleted()
-                    _events.emit(GettingStartedScreenEvents.NavigateToHomeScreen)
-                } else
-                    _events.emit(GettingStartedScreenEvents.NavigateToUserDetailsScreen)
-            } else {
-                sendError(resource.message)
-                _events.emit(GettingStartedScreenEvents.Logout)
-            }
-        }
     }
 
     fun logoutFailed() = viewModelScope.launch {

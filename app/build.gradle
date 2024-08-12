@@ -18,8 +18,6 @@ android {
         versionCode 1
         versionName "1.0"
 
-        manifestPlaceholders = [auth0Domain: "@string/domain", auth0Scheme: "@string/scheme"]
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildFeatures{
@@ -71,9 +69,6 @@ dependencies {
     implementation platform('com.google.firebase:firebase-bom:28.1.0')
     implementation 'com.google.firebase:firebase-firestore-ktx'
     implementation 'com.google.firebase:firebase-storage-ktx'
-
-    //auth0
-    implementation 'com.auth0.android:auth0:2.+'
 
 
     def lottieVersion = "4.0.0"
