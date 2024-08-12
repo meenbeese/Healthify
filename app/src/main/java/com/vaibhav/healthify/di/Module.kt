@@ -5,11 +5,6 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.room.Room
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.ktx.storage
 import com.vaibhav.healthify.data.local.room.HealthifyDB
 import com.vaibhav.healthify.data.local.room.LeaderBoardDao
 import com.vaibhav.healthify.data.local.room.SleepDao
@@ -33,12 +28,6 @@ import javax.inject.Singleton
 object Module {
 
     private val Context.dataStore by preferencesDataStore(DATASTORE)
-
-    @Provides
-    fun providesFireStore(): FirebaseFirestore = Firebase.firestore
-
-    @Provides
-    fun providesStorage(): FirebaseStorage = Firebase.storage
 
     @Provides
     fun providesDataStore(@ApplicationContext context: Context): DataStore<Preferences> {

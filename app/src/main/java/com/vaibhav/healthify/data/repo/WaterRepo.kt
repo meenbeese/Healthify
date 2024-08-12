@@ -3,7 +3,6 @@ package com.vaibhav.healthify.data.repo
 import com.vaibhav.healthify.data.local.dataSource.RoomWaterDataSource
 import com.vaibhav.healthify.data.models.local.Water
 import com.vaibhav.healthify.data.models.mapper.WaterMapper
-import com.vaibhav.healthify.data.remote.water.FirestoreWaterDataSource
 import com.vaibhav.healthify.util.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOn
@@ -13,7 +12,6 @@ import javax.inject.Inject
 
 class WaterRepo @Inject constructor(
     private val waterDataSource: RoomWaterDataSource,
-    private val firebaseWaterDataSource: FirestoreWaterDataSource,
     private val authRepo: AuthRepo,
     private val waterMapper: WaterMapper
 ) {
@@ -24,25 +22,10 @@ class WaterRepo @Inject constructor(
     fun getAllWaterLogsOfLastWeek() = waterDataSource.getAllWaterLogsAfterTime(getTimeOfLastWeek())
         .flowOn(Dispatchers.IO)
 
-    suspend fun fetchAllWaterLogs(): Resource<Unit> = withContext(Dispatchers.IO) {
-        return@withContext authRepo.getCurrentUser()?.let {
-            val resource = firebaseWaterDataSource.getAllWaterLogs(it.email)
-            if (resource is Resource.Success) {
-                dumpNewWaterLogsDataIntoDb(waterMapper.toEntityList(resource.data!!))
-                Resource.Success<Unit>()
-            } else Resource.Error(resource.message, errorType = resource.errorType)
-        } ?: Resource.Error(USER_DOES_NOT_EXIST)
-    }
-
     suspend fun insertIntoWaterLog(water: Water): Resource<Unit> = withContext(Dispatchers.IO) {
         return@withContext authRepo.getCurrentUser()?.let {
-            val waterDTO = waterMapper.toDTO(water)
-            waterDTO.userEmail = it.email
-            val resource = firebaseWaterDataSource.addWater(it.email, waterDTO)
-            if (resource is Resource.Success) {
-                insertWaterIntoDb(listOf(water))
-                Resource.Success<Unit>()
-            } else Resource.Error(resource.message, errorType = resource.errorType)
+            insertWaterIntoDb(listOf(water))
+            Resource.Success<Unit>()
         } ?: Resource.Error(USER_DOES_NOT_EXIST)
     }
 

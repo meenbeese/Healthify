@@ -2,7 +2,6 @@ package com.vaibhav.healthify.data.repo
 
 import com.vaibhav.healthify.data.models.local.User
 import com.vaibhav.healthify.data.models.mapper.UserMapper
-import com.vaibhav.healthify.data.remote.auth.FirebaseAuthDataSource
 import com.vaibhav.healthify.util.Resource
 import com.vaibhav.healthify.util.getSleepQuantity
 import com.vaibhav.healthify.util.getWaterQuantity
@@ -12,7 +11,6 @@ import timber.log.Timber
 import javax.inject.Inject
 
 class AuthRepo @Inject constructor(
-    private val authDataSource: FirebaseAuthDataSource,
     private val preferencesRepo: PreferencesRepo,
     private val userMapper: UserMapper
 ) {
